@@ -1,0 +1,30 @@
+resource "aws_efs_file_system" "my_efs" {
+  # (resource arguments)
+  creation_token = "my-product"
+
+  tags = {
+    Name = "MyProduct"
+  }
+}
+resource "aws_efs_access_point" "test" {
+  file_system_id = aws_efs_file_system.my_efs.id
+}
+
+resource "aws_efs_mount_target" "primary" {
+  file_system_id  = aws_efs_file_system.my_efs.id
+  subnet_id       = aws_default_subnet.default_az-a.id
+  security_groups = [aws_security_group.apache.id]
+}
+
+resource "aws_efs_mount_target" "secondary" {
+  file_system_id  = aws_efs_file_system.my_efs.id
+  subnet_id       = aws_default_subnet.default_az-b.id
+  security_groups = [aws_security_group.apache.id]
+
+}
+
+output "aws_efs_filw_system" {
+  value = aws_efs_file_system.my_efs.id
+}
+
+
