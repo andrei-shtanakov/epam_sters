@@ -8,7 +8,7 @@ resource "aws_elb" "elb" {
   security_groups = [aws_security_group.apache.id]
 
   listener {
-    instance_port     = 80
+    instance_port     = 8000
     instance_protocol = "http"
     lb_port           = 80
     lb_protocol       = "http"
@@ -18,7 +18,7 @@ resource "aws_elb" "elb" {
     healthy_threshold   = 5
     unhealthy_threshold = 2
     timeout             = 10
-    target              = "HTTP:80/"
+    target              = "HTTP:8000/admin"
     interval            = 30
   }
 

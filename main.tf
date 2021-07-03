@@ -189,6 +189,14 @@ ingress {
     cidr_blocks = [aws_default_vpc.default.cidr_block]
   }
 
+  ingress {
+    from_port   = 8000
+    to_port     = 8000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+
   egress {
     from_port   = 0
     to_port     = 0
@@ -208,7 +216,7 @@ resource "aws_db_instance" "mysqldb" {
   engine               = "mysql"
   engine_version       = "8.0.20"
   instance_class       = "db.t2.micro"
-  name                 = "wordpress"
+  name                 = "app_db"
   identifier           = "mysqldb"
   identifier_prefix    = null
 #  id                   = "mysqldb"
@@ -217,7 +225,7 @@ resource "aws_db_instance" "mysqldb" {
   storage_encrypted    = false
   skip_final_snapshot  = true
   snapshot_identifier  = null
-  username             = "wordpressuser"
+  username             = "db_user"
   password             = "12345678"
   parameter_group_name = "default.mysql8.0"
   db_subnet_group_name = "for-db"
@@ -245,10 +253,11 @@ resource "aws_db_subnet_group" "for-db" {
 resource "aws_instance" "my_ubuntu" {
   ami                    = data.aws_ami.latest_ubuntu.id
   instance_type          = "t2.micro"
-  key_name               = aws_key_pair.deployer.id
+  key_name               = aws_key_pair.test.id
   vpc_security_group_ids = [aws_security_group.apache.id]
   availability_zone      = data.aws_availability_zones.working.names[0]
   user_data              = templatefile("apache_script.tpl", {
+    public_ip            = "0.0.0.0",
     fs_name              = aws_efs_file_system.my_efs.id,
     db_address           = aws_db_instance.mysqldb.address,
  
@@ -266,10 +275,11 @@ resource "aws_instance" "my_ubuntu" {
 resource "aws_instance" "my_ubuntu2" {
   ami                    = data.aws_ami.latest_ubuntu.id
   instance_type          = "t2.micro"
-  key_name               = aws_key_pair.deployer.id
+  key_name               = aws_key_pair.test.id
   vpc_security_group_ids = [aws_security_group.apache.id]
   availability_zone      = data.aws_availability_zones.working.names[1]
   user_data              = templatefile("apache_script.tpl", {
+    public_ip            = "0.0.0.0",
     fs_name              = aws_efs_file_system.my_efs.id,
     db_address           = aws_db_instance.mysqldb.address,
   })
@@ -348,10 +358,16 @@ output "subnet_cidr_blocks-b" {
 }
 
 
-resource "aws_key_pair" "deployer" {
-  key_name   = "deployer_key"
-  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDAccnhhq6Jaoe99qLP1hgUP9O2mrVFmmpYEZouY7VNjcTVdkZihj7LBP/4niODLFIUH+E7iYS89dnB6xtS9T8BXsiHChk6K3K2HlI6vObd8i5kKMgtSP9bGarW9Fuq+3S/VHQP94JSBDKcCm2TqgvQZcmd6sgeN4optp3WpAWMR56HJbZqTyrNr2tIOYvm0LBq0QlGNyFyxuXpKTEDHzpGhiaHZl+5e+MWxtshR13rnCTirHYl+fSCAr3r+dNcukBr8UZdWQ6FEW8DJWs3c5116YoFU6d1Rp9FV/yLTmUOo/gU/xcy6f6h0W0gprBW8tLdSVsb2niP0NrBB9ZKo0FH user@epam2"
+resource "aws_key_pair" "test" {
+  key_name   = "test"
+  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCfk1mG0oYySWFG0/GQLjKAc4dC/ZlIvL5rHlZqQEfmDBt2Tr5iXwBbiQTv29QPglcDbRB/JlTt9GzjSnsGRh05YIUW1mGflgngNtgq+dDZOEBKZj++A1w5vj63Vltd5PIkgx3++1sKR3PsVZLV0gfj/v+n1g7REZQRVmukJfpdKRBOUk3O0nUxVxo4tXMp2irbUDdwZI4Z/QM1ugoTRKUQcB5V5KfnkaCbZ3GuHigV3aLdjEb1j2UI6feL1aQVwMJw/7nfyWlwuJ4x7r6+hKktb1SopmNRXPl7kKiKQb+AObUQEkfvXdOqdXnpcldJX/SyYxcYGtf5pShzJD7/FOm+TlhJ/Jum13ExL3ga79h4TzFelUsQNVCDFYJxqPLK26PvRPRHCZvVhiRi44FPsZiBY6EbU8M5qbymh44TKmHVQ8gg0Ii2rTeVH6l7HpLP6IE2pX83jUxKJ6egOjVhAtJDUMHq3vF8RW4FnlSDx9oLQ4I/sVOpHhA0RZa+qUwQnDc= user@epam2"
 }
+
+#resource "aws_key_pair" "test" {
+#  key_name   = "test"
+#  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDAccnhhq6Jaoe99qLP1hgUP9O2mrVFmmpYEZouY7VNjcTVdkZihj7LBP/4niODLFIUH+E7iYS89dnB6xtS9T8BXsiHChk6K3K2HlI6vObd8i5kKMgtSP9bGarW9Fuq+3S/VHQP94JSBDKcCm2TqgvQZcmd6sgeN4optp3WpAWMR56HJbZqTyrNr2tIOYvm0LBq0QlGNyFyxuXpKTEDHzpGhiaHZl+5e+MWxtshR13rnCTirHYl+fSCAr3r+dNcukBr8UZdWQ6FEW8DJWs3c5116YoFU6d1Rp9FV/yLTmUOo/gU/xcy6f6h0W0gprBW8tLdSVsb2niP0NrBB9ZKo0FH user@epam2"
+#}
+
 
 output "aws_vpcs" {
   value = data.aws_vpcs.my_vpcs.id
