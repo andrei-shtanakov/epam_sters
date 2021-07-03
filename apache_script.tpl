@@ -33,5 +33,5 @@ DB_HOST='${db_address}'
 DEBUG=True
 DB_PASSWORD='12345678'
 SECRET_KEY='django-insecure-9c7qcp&9y3n0ucke0b63%mg#w=ws4j6@!pg=o6hmrran#&76d_'
-ALLOWED_HOSTS='[${public_ip}]'
+ALLOWED_HOSTS='['${public_ip}']'
 EOF

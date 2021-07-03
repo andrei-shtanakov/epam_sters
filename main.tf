@@ -257,7 +257,7 @@ resource "aws_instance" "my_ubuntu" {
   vpc_security_group_ids = [aws_security_group.apache.id]
   availability_zone      = data.aws_availability_zones.working.names[0]
   user_data              = templatefile("apache_script.tpl", {
-    public_ip            = "0.0.0.0",
+    public_ip            = "*",
     fs_name              = aws_efs_file_system.my_efs.id,
     db_address           = aws_db_instance.mysqldb.address,
  
@@ -279,7 +279,7 @@ resource "aws_instance" "my_ubuntu2" {
   vpc_security_group_ids = [aws_security_group.apache.id]
   availability_zone      = data.aws_availability_zones.working.names[1]
   user_data              = templatefile("apache_script.tpl", {
-    public_ip            = "0.0.0.0",
+    public_ip            = "*",
     fs_name              = aws_efs_file_system.my_efs.id,
     db_address           = aws_db_instance.mysqldb.address,
   })

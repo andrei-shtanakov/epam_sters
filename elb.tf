@@ -18,7 +18,7 @@ resource "aws_elb" "elb" {
     healthy_threshold   = 5
     unhealthy_threshold = 2
     timeout             = 10
-    target              = "HTTP:8000/admin"
+    target              = "HTTP:8000/api/docs"
     interval            = 30
   }
 
